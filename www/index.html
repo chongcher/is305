@@ -27,18 +27,75 @@
     <script src="lib/ionic/js/ionic.bundle.js"></script>
 
     <!-- cordova script (this will be a 404 during development) -->
+    <script src="lib/ngCordova/dist/ng-cordova.js">
     <script src="cordova.js"></script>
 
     <!-- your app's js -->
     <script src="js/app.js"></script>
+    <script src="js/controller.js"></script>
   </head>
-  <body ng-app="starter">
+  <body ng-app="fitbyte">
 
     <ion-pane>
       <ion-header-bar class="bar-stable">
-        <h1 class="title">Ionic Blank Starter</h1>
+        <h1 class="title">Fitbyte</h1>
       </ion-header-bar>
       <ion-content>
+        <div ng-controller="trackSensorDataController">
+          
+          <form ng-submit="trackSensorData(sensorData)" name="trackSensorDataForm">
+            <table>
+              
+              <tr>
+                <td>Device_ID</td>
+                <td><select ng-model="sensorData.Device_ID">
+                    <option value="d001">d001</option>
+                    <option value="d002">d002</option>
+                    <option value="d003">d003</option>
+                </td></select>
+              </tr>
+              
+              <tr>
+                <td>Record_Datetime</td>
+                <td><input type="text" ng-model="sensorData.Record_Datetime">{{data.currentDatetime}}</td>
+              </tr>
+
+              <tr>
+                <td>Heartrate</td>
+                <td>{{data.Heartrate}}</td>
+              </tr>
+
+              <tr>
+                <td>Gps_Lat</td>
+                <td>{{data.Gps_Lat}}</td>
+              </tr>
+
+              <tr>
+                <td>Gps_Long</td>
+                <td>{{data.Gps_Long}}</td>
+              </tr>
+
+              <tr>
+                <td>Gps_Altitude</td>
+                <td>{{data.Gps_Altitude}}</td>
+              </tr>
+
+              <tr>
+                <td>Gps_Satallites</td>
+              </tr>
+
+              <tr>
+                <td>Accelerometer</td>
+              </tr>
+
+              <tr>
+                <td>Proxminity_Sensor</td>
+              </tr>
+
+            </table>
+            <button type="submit">Track Data</button>
+          </form>
+        </div>
       </ion-content>
     </ion-pane>
   </body>
