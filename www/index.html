@@ -33,6 +33,32 @@
     <!-- your app's js -->
     <script src="js/app.js"></script>
     <script src="js/controller.js"></script>
+
+    function onLoad() {
+        document.addEventListener("deviceready", function() { 
+          angular.bootstrap(document, ['fitbyte']);
+        }, false);
+        var fitbyte = angular.module('fitbyte', ['ionic', 'fitbyte.controllers'])
+          .run(function($ionicPlatform) {
+            $ionicPlatform.ready(function() {
+              if(window.cordova && window.cordova.plugins.Keyboard) {
+                // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
+                // for form inputs)
+                cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+
+                // Don't remove this line unless you know what you are doing. It stops the viewport
+                // from snapping when text inputs are focused. Ionic handles this internally for
+                // a much nicer keyboard experience.
+                cordova.plugins.Keyboard.disableScroll(true);
+              }
+              if(window.StatusBar) {
+                StatusBar.styleDefault();
+              }
+            });
+          })
+
+    }
+
   </head>
   <body ng-app="fitbyte">
 
@@ -42,22 +68,30 @@
       </ion-header-bar>
       <ion-content>
         <div ng-controller="trackSensorDataController">
-          
+
           <form ng-submit="trackSensorData(sensorData)" name="trackSensorDataForm">
+            
             <table>
+
+              <tr>
+                <td>Interval (Seconds)</td>
+                <td><input type="number" ng-model="sensorData.interval"></td>
+              </tr>
               
               <tr>
                 <td>Device_ID</td>
-                <td><select ng-model="sensorData.Device_ID">
-                    <option value="d001">d001</option>
+                <td>
+                  <select ng-model="sensorData.Device_ID">
+                    <option value="d001" ng-selected="true">d001</option>
                     <option value="d002">d002</option>
                     <option value="d003">d003</option>
-                </td></select>
+                  </select>
+                </td>
               </tr>
               
               <tr>
                 <td>Record_Datetime</td>
-                <td><input type="text" ng-model="sensorData.Record_Datetime">{{data.currentDatetime}}</td>
+                <td><input type="hidden" ng-model="sensorData.Record_Datetime" value="{{data.currentDatetime}}">{{data.currentDatetime}}</td>
               </tr>
 
               <tr>
@@ -81,7 +115,7 @@
               </tr>
 
               <tr>
-                <td>Gps_Satallites</td>
+                <td>Gps_Accuracy</td>
               </tr>
 
               <tr>
@@ -93,8 +127,12 @@
               </tr>
 
             </table>
+            
             <button type="submit">Track Data</button>
           </form>
+
+          <button ng-click="stopTracking()">Stop Tracking</button>
+
         </div>
       </ion-content>
     </ion-pane>
