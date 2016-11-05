@@ -48,7 +48,6 @@ angular.module('fitbyte.controllers', ['ionic','ngCordova'])
             
             //get proximity sensor data
             data.Proximity_Sensor = Math.round(normal(125, 255, 1)); //randomly generate a number;
-            data.Proximity_Sensor = 1.7242345;
             
             //set sensor data into $scope
             $scope.data = data;
@@ -79,7 +78,7 @@ angular.module('fitbyte.controllers', ['ionic','ngCordova'])
         }, function(err){
             // An error occurred. Show a message to the user
             console.log(err);
-            promise = deferred.error("Error getting GPS data");
+            promise = deferred.reject("Error getting GPS data");
         })
 
         return deferred.promise;
