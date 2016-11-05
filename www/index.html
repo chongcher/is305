@@ -91,7 +91,7 @@
               
               <tr>
                 <td>Record_Datetime</td>
-                <td><input type="hidden" ng-model="sensorData.Record_Datetime" value="{{data.currentDatetime}}">{{data.currentDatetime}}</td>
+                <td><input type="hidden" ng-model="sensorData.Record_Datetime" value="{{data.Record_Datetime}}">{{data.Record_Datetime}}</td>
               </tr>
 
               <tr>
@@ -110,20 +110,13 @@
               </tr>
 
               <tr>
-                <td>Gps_Altitude</td>
-                <td>{{data.Gps_Altitude}}</td>
-              </tr>
-
-              <tr>
                 <td>Gps_Accuracy</td>
+                <td>{{data.Gps_Accuracy}}</td>
               </tr>
 
               <tr>
-                <td>Accelerometer</td>
-              </tr>
-
-              <tr>
-                <td>Proxminity_Sensor</td>
+                <td>Proximity_Sensor</td>
+                <td>{{data.Proximity_Sensor}}</td>
               </tr>
 
             </table>

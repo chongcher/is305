@@ -1,66 +1,115 @@
 angular.module('fitbyte.controllers', ['ionic','ngCordova'])
 
-.controller('trackSensorDataController', function($scope, $state, $http, $q, $interval, $cordovaGeolocation, $cordovaDeviceMotion){
+.controller('trackSensorDataController', function($scope, $state, $http, $q, $interval, $cordovaGeolocation){
 
     var running;
 
+    //set the default value of sensorData.interval, must set Device_ID too or it disappears
+    $scope.sensorData = {interval: 5, Device_ID: "d001"};
+
     $scope.trackSensorData = function(sensorData){
 
-        //Don't run multiple instances
-        if ( angular.isDefined(running) ) return;
+        //Don't run multiple instances of interval
+        if ( angular.isDefined(running) ) {
+            console.log("Already tracking!");
+        };
 
         var intervalInMilliseconds = angular.isDefined(sensorData.interval) ?  sensorData.interval * 1000 : 0;
-        // intervalInMilliseconds = sensorData.interval * 1000;
-        console.log("intervalInMilliseconds", intervalInMilliseconds);
         if(intervalInMilliseconds > 0){
             
             //triggers every (interval) seconds
             running = $interval(function(){
+                getSensorData(sensorData).then(function(data){
+                    
+                    writeToDB(data);
                 
-                //create a new data object
-                data = {
-                'currentDatetime': (new Date).toUTCString(),
-                'Heartrate': Math.round(normal(80, 10, 10)), //randomly generate a number
-                };
-                
-                //get GPS sensor data
-                var posOptions = {timeout: 2500, enableHighAccuracy: true, maximumAge: 5000};
-                $cordovaGeolocation.getCurrentPosition(posOptions).then(function(position){
-                    data.Gps_Lat = position.coords.latitude;
-                    data.Gps_Long = position.coords.longitude;
-                    data.Gps_Altitude = position.coords.altitude;
-                }, function(err){
-                    // An error occurred. Show a message to the user
-                    console.log(err);
                 })
-                
-                //get accelerometer sensor data
-                $cordovaDeviceMotion.getCurrentAcceleration().then(function(result) {
-                    console.log(result);
-                    data.Accelerometer = result;
-                    var X = result.x;
-                    var Y = result.y;
-                    var Z = result.z;
-                    var timeStamp = result.timestamp;
-                }, function(err) {
-                    // An error occurred. Show a message to the user
-                    console.log(err);
-                });
-                
-                /*//get proximity sensor data
-                navigator.proximity.getProximityState(function(state){
-                    console.log(state);
-                    data.Proximity_Sensor = state;
-                }, function(err) {
-                    // An error occurred. Show a message to the user
-                    console.log(err);
-                });*/
-                
-                //set sensor data into $scope
-                $scope.data = data;
-            }, intervalInMilliseconds );
-
+            }, intervalInMilliseconds);
         }
+                
+    }
+
+    getSensorData = function(sensorData){
+
+        var deferred = $q.defer();
+        var promise;
+        //create a new data object
+        var data = {
+        'Device_ID': sensorData.Device_ID,
+        'Record_Datetime': (new Date).toUTCString(),
+        'Heartrate': Math.round(normal(80, 10, 10)), //randomly generate a number
+        };
+                
+        //get Gps sensor data
+        getGPSData().then(function(gpsData){
+            for(var pair in gpsData){
+                data[pair] = gpsData[pair];
+            }
+            
+            //get proximity sensor data
+            data.Proximity_Sensor = Math.round(normal(125, 255, 1)); //randomly generate a number;
+            data.Proximity_Sensor = 1.7242345;
+            
+            //set sensor data into $scope
+            $scope.data = data;
+
+            promise = deferred.resolve(data);
+
+        })
+                
+        return deferred.promise;
+
+    }
+
+    getGPSData = function(){
+
+        var deferred = $q.defer();
+        var promise;
+        var posOptions = {timeout: 2500, enableHighAccuracy: true, maximumAge: 5000};
+        
+        $cordovaGeolocation.getCurrentPosition(posOptions).then(function(position){
+            var gpsData = {};
+            gpsData.Gps_Lat = position.coords.latitude;
+            gpsData.Gps_Long = position.coords.longitude;
+            gpsData.Gps_Accuracy = position.coords.accuracy;
+            console.log("Gps.altitude: ", position.coords.altitude);
+
+            promise = deferred.resolve(gpsData);
+
+        }, function(err){
+            // An error occurred. Show a message to the user
+            console.log(err);
+            promise = deferred.error("Error getting GPS data");
+        })
+
+        return deferred.promise;
+
+    }
+
+    writeToDB = function(data){
+        //write data to db
+        function dbAPI(){
+            var url = 'https://u7dnjewi12.execute-api.ap-southeast-1.amazonaws.com/dev/';
+            var deferred = $q.defer();
+            var httpRequest = {
+                method: 'POST',
+                url: url,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                data: data,
+            };
+            var promise = $http(httpRequest).success(function (response) {
+                deferred.resolve(response);
+            }).error(function (error) {
+                deferred.reject(error);
+            });
+            return deferred.promise;
+        }
+        
+        dbAPI().then(function(response){
+            console.log(response);
+        })
     }
 
     $scope.stopTracking = function(){
